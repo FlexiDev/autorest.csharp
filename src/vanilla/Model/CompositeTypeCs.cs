@@ -19,11 +19,22 @@ namespace AutoRest.CSharp.Model
 
         public CompositeTypeCs()
         {
+             Name.OnGet += value => GetTypeName(value);
             _constructorModel = new ConstructorModel(this);
+        }
+
+        private string GetTypeName(string value)
+        {
+            if (true == Extensions.Get<bool>(SwaggerExtensions.ExternalExtension))
+            {
+                return Name.RawValue;
+            }
+            return value;
         }
 
         public CompositeTypeCs(string name) : base(name)
         {
+            Name.OnGet += value => GetTypeName(value);
             _constructorModel = new ConstructorModel(this);
         }
 
