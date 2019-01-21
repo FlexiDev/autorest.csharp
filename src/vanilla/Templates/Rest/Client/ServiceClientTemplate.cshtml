@@ -8,6 +8,7 @@
 namespace @Settings.Namespace
 {
     using Microsoft.Rest;
+    using Microsoft.Rest.TransientFaultHandling;
 @foreach (var usingString in Model.Usings) {
     @:using @usingString;
 }
@@ -55,7 +56,8 @@ namespace @Settings.Namespace
             SerializationSettings = new Newtonsoft.Json.JsonSerializerSettings
             {
                 Formatting = Newtonsoft.Json.Formatting.Indented,
-                DateFormatHandling = Newtonsoft.Json.DateFormatHandling.IsoDateFormat,
+                //Flexi REST services are WCF based and expect dates in Microsoft format.
+                DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat,
                 DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Utc,
                 NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
                 ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Serialize,
@@ -86,6 +88,9 @@ namespace @Settings.Namespace
             @:SerializationSettings.Converters.Add(new Microsoft.Rest.Serialization.PolymorphicSerializeJsonConverter<@(polymorphicType.Name)>("@(polymorphicType.PolymorphicDiscriminator)"));
             @:DeserializationSettings.Converters.Add(new  Microsoft.Rest.Serialization.PolymorphicDeserializeJsonConverter<@(polymorphicType.Name)>("@(polymorphicType.PolymorphicDiscriminator)"));
             }
+
+            //Flexi services do not expect retrying in case of error. The number of retry attempts should be 0.
+            SetRetryPolicy(new RetryPolicy<HttpStatusCodeErrorDetectionStrategy>(0));
 
             CustomInitialize();
             
