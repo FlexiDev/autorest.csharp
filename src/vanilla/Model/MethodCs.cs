@@ -253,14 +253,26 @@ namespace AutoRest.CSharp.Model
             }
         }
 
-        public PropertyCs GetReturnDTOProperty()
+        /// <summary>
+        /// This method is for "x-flexi-method" extension support
+        /// </summary>
+        /// <returns></returns>
+        private PropertyCs GetReturnDTOProperty()
         {
-            var returnType = ReturnType.Body.Children.First() as PropertyCs;
-            if (null == returnType && true == Extensions.Get<bool>("x-flexi-method"))
-                throw new ApplicationException($"Method {this.Name.RawValue} is marked as x-flexi-method, but has wrong response format.");
-            return returnType;
+            if (Responses.Count == 1 &&
+                Responses.TryGetValue(HttpStatusCode.OK, out Response okResp) &&
+                okResp.Body != null &&
+                okResp.Body.Children.Count() == 1)
+            {
+                var returnType = okResp.Body.Children.First() as PropertyCs;
+                if (null != returnType)
+                    return returnType;
+            }
+            
+            throw new ApplicationException($"Method {this.Name.RawValue} is marked as x-flexi-method, but has wrong response format.");
         }
 
+        [JsonIgnore]
         public string ReturnDTOPropertyName
         {
             get
@@ -268,6 +280,7 @@ namespace AutoRest.CSharp.Model
                 return GetReturnDTOProperty()?.Name;
             }
         }
+
 
         /// <summary>
         /// Get the method's request body (or null if there is no request body)

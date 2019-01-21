@@ -103,8 +103,12 @@ namespace AutoRest.CSharp
                 {
                     throw new Exception($"Generator received incorrect number of inputs: {files.Length} : {string.Join(",", files)}");
                 }
+
+
                 var modelAsJson = (await ReadFile(files[0])).EnsureYamlIsJson();
                 var codeModelT = new ModelSerializer<CodeModel>().Load(modelAsJson);
+
+                Console.Error.WriteLine("Process settings.");
 
                 // build settings
                 var altNamespace = (await GetValue<string[]>("input-file") ?? new[] { "" }).FirstOrDefault()?.Split('/').Last().Split('\\').Last().Split('.').First();
@@ -141,20 +145,28 @@ namespace AutoRest.CSharp
                 using (plugin.Activate())
                 {
                     Settings.Instance.Namespace = Settings.Instance.Namespace ?? CodeNamer.Instance.GetNamespaceName(altNamespace);
+
+                    Console.Error.WriteLine("Deserializing code model.");
+
                     var codeModel = plugin.Serializer.Load(modelAsJson);
                     codeModel = plugin.Transformer.TransformCodeModel(codeModel);
                     if (await GetValue<bool?>("sample-generation") ?? false)
                     {
+                        Console.Error.WriteLine("Generating sample code.");
                         plugin.CodeGenerator.GenerateSamples(codeModel).GetAwaiter().GetResult();
                     }
                     else
                     {
+                        Console.Error.WriteLine("Generating code.");
                         plugin.CodeGenerator.Generate(codeModel).GetAwaiter().GetResult();
                     }
                 }
 
                 // write out files
+                Console.Error.WriteLine("Writing files.");
                 await WriteFiles(Settings.Instance.FileSystemOutput);
+
+                Console.Error.WriteLine("Done.");
                 return true;
             }
         }
