@@ -144,7 +144,6 @@ namespace AutoRest.CSharp.Model
                 }
 
                 return "Microsoft.Rest.HttpOperationResponse";
-
             }
         }
 
@@ -157,7 +156,14 @@ namespace AutoRest.CSharp.Model
             {
                 if (ReturnType.Body != null)
                 {
-                    return string.Format(CultureInfo.InvariantCulture,
+                    if (true == Extensions.Get<bool>("x-flexi-method"))
+                    {
+                        var returnType = GetReturnDTOProperty();
+                        return string.Format(CultureInfo.InvariantCulture,
+                        "System.Threading.Tasks.Task<{0}>", returnType.ModelType.AsNullableType(HttpMethod != HttpMethod.Head && IsXNullableReturnType));
+                    }
+                    else
+                        return string.Format(CultureInfo.InvariantCulture,
                         "System.Threading.Tasks.Task<{0}>", ReturnType.Body.AsNullableType(HttpMethod != HttpMethod.Head && IsXNullableReturnType));
                 }
                 else if (ReturnType.Headers != null)
@@ -228,7 +234,13 @@ namespace AutoRest.CSharp.Model
             {
                 if (ReturnType.Body != null)
                 {
-                    return ReturnType.Body.AsNullableType(HttpMethod != HttpMethod.Head && IsXNullableReturnType);
+                    if (true == Extensions.Get<bool>("x-flexi-method"))
+                    {
+                        var returnType = GetReturnDTOProperty();
+                        return returnType.ModelType.AsNullableType(HttpMethod != HttpMethod.Head && IsXNullableReturnType);
+                    }
+                    else
+                        return ReturnType.Body.AsNullableType(HttpMethod != HttpMethod.Head && IsXNullableReturnType);
                 }
                 if (ReturnType.Headers != null)
                 {
@@ -238,6 +250,22 @@ namespace AutoRest.CSharp.Model
                 {
                     return "void";
                 }
+            }
+        }
+
+        public PropertyCs GetReturnDTOProperty()
+        {
+            var returnType = ReturnType.Body.Children.First() as PropertyCs;
+            if (null == returnType && true == Extensions.Get<bool>("x-flexi-method"))
+                throw new ApplicationException($"Method {this.Name.RawValue} is marked as x-flexi-method, but has wrong response format.");
+            return returnType;
+        }
+
+        public string ReturnDTOPropertyName
+        {
+            get
+            {
+                return GetReturnDTOProperty()?.Name;
             }
         }
 

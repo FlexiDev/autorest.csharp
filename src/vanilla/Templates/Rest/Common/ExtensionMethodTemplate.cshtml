@@ -89,13 +89,13 @@ foreach (ParameterCs parameter in Model.LocalParameters)
         {
     @:var _result = await operations.@(Model.Name)WithHttpMessagesAsync(@(Model.GetAsyncMethodInvocationArgs("null"))).ConfigureAwait(false);
     @:_result.Request.Dispose();
-    @:return _result.Body;
+    @:return _result.Body.@((Model as MethodCs).ReturnDTOPropertyName);
         }
         else
         {
     @:using (var _result = await operations.@(Model.Name)WithHttpMessagesAsync(@(Model.GetAsyncMethodInvocationArgs("null"))).ConfigureAwait(false))
     @:{
-    @:    return _result.Body;
+    @:    return _result.Body.@((Model as MethodCs).ReturnDTOPropertyName);
     @:}
         }
     }
