@@ -104,6 +104,7 @@ namespace AutoRest.CSharp
                     throw new Exception($"Generator received incorrect number of inputs: {files.Length} : {string.Join(",", files)}");
                 }
 
+                Console.Error.WriteLine("Loading code model as JSON.");
 
                 var modelAsJson = (await ReadFile(files[0])).EnsureYamlIsJson();
                 var codeModelT = new ModelSerializer<CodeModel>().Load(modelAsJson);
