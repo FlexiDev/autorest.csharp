@@ -160,7 +160,7 @@ namespace AutoRest.CSharp.Model
                     {
                         var returnType = GetReturnDTOProperty();
                         return string.Format(CultureInfo.InvariantCulture,
-                        "System.Threading.Tasks.Task<{0}>", returnType.ModelType.AsNullableType(HttpMethod != HttpMethod.Head && IsXNullableReturnType));
+                        "System.Threading.Tasks.Task<{0}>", returnType.ModelType.AsNullableType(HttpMethod != HttpMethod.Head && !returnType.IsRequired));
                     }
                     else
                         return string.Format(CultureInfo.InvariantCulture,
@@ -237,7 +237,7 @@ namespace AutoRest.CSharp.Model
                     if (true == Extensions.Get<bool>("x-flexi-method"))
                     {
                         var returnType = GetReturnDTOProperty();
-                        return returnType.ModelType.AsNullableType(HttpMethod != HttpMethod.Head && IsXNullableReturnType);
+                        return returnType.ModelType.AsNullableType(HttpMethod != HttpMethod.Head && !returnType.IsRequired);
                     }
                     else
                         return ReturnType.Body.AsNullableType(HttpMethod != HttpMethod.Head && IsXNullableReturnType);
