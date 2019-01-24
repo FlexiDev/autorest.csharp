@@ -132,5 +132,19 @@ namespace AutoRest.CSharp
             }
             return defaultValue;
         }
+        
+        /// <summary>
+        ///     Formats a string for naming a local variable.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns>The formatted string.</returns>
+        public override string GetVariableName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return name;
+            }
+            return GetValidName(GetEscapedReservedName(name, "Variable"), '_');
+        }
     }
 }
