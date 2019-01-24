@@ -45,13 +45,18 @@ namespace AutoRest.CSharp
                 {
                     codeModel.Name = methodGrp;
                     // Service server
-                    var serviceControllerTemplate = new AutoRest.CSharp.vanilla.Templates.Rest.Server.ServiceControllerTemplate { Model = codeModel };
+                    var serviceControllerTemplate = new AutoRest.CSharp.vanilla.Templates.Rest.Server.WcfServiceInterfaceTemplate { Model = codeModel };
                     await Write(serviceControllerTemplate, $"{GeneratedSourcesBaseFolder}{codeModel.Name}{ImplementationFileExtension}");
                 }
             }
             // Models
             foreach (CompositeTypeCs model in codeModel.ModelTypes.Union(codeModel.HeaderTypes))
             {
+                if (true == model.Extensions.Get<bool>(SwaggerExtensions.ExternalExtension))
+                {
+                    continue;
+                }
+
                 var modelTemplate = new ModelTemplate { Model = model };
                 await Write(modelTemplate, $"{GeneratedSourcesBaseFolder}{FolderModels}/{model.Name}{ImplementationFileExtension}");
             }

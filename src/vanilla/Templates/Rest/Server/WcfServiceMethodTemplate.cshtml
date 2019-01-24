@@ -1,0 +1,34 @@
+@using System.Globalization
+@using System.Linq;
+@using System
+@using AutoRest.Core.Model
+@using AutoRest.Core.Utilities
+@using AutoRest.CSharp
+@using AutoRest.CSharp.Model
+@inherits AutoRest.Core.Template<AutoRest.CSharp.Model.MethodCs>
+
+@if (!string.IsNullOrWhiteSpace(Model.Description) || !string.IsNullOrEmpty(Model.Summary))
+{
+    @:/// <summary>
+        @:@WrapComment("/// ", String.IsNullOrEmpty(Model.Summary) ? Model.Description.EscapeXmlComment() : Model.Summary.EscapeXmlComment())
+        if (!string.IsNullOrEmpty(Model.ExternalDocsUrl))
+    {
+            @:/// <see href="@Model.ExternalDocsUrl" />
+        }
+        @:///
+    @:/// </summary>
+}
+
+@if (!String.IsNullOrEmpty(Model.Description) && !String.IsNullOrEmpty(Model.Summary))
+{
+    @:/// <remarks>
+        @:@WrapComment("/// ", Model.Description.EscapeXmlComment())
+        @:///
+        @:///
+    @:/// </remarks>
+}
+
+[OperationContract]
+[FaultContract(typeof(Flexi.Base.MessageItem[]))]
+[WebInvoke(Method = "POST")]
+@Model.ReturnTypeString @(Model.Name)(@Model.GetSyncMethodParameterDeclaration(false));
