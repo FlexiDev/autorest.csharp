@@ -300,10 +300,49 @@ if (_shouldTrace)
 System.Net.HttpStatusCode _statusCode = _httpResponse.StatusCode;
 cancellationToken.ThrowIfCancellationRequested();
 string _responseContent = null;
+@EmptyLine
+//Flexi integration error handling begin.
+//Internal Server Error (500) may be caused by different reasons.
+//Flexi uses it to notify the client about internal exceptions.
+//If the response body corresponds to Flexi.Base.MessageItem[],
+//propagate it as a Flexi.Base.WebServices.FlexiIntegrationException to the client.
+if ((int)_statusCode == System.Net.HttpStatusCode.InternalServerError)
+{
+    //Read content as string
+    if (_httpResponse.Content != null) {
+        _responseContent = await _httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+    }
+    else {
+        _responseContent = string.Empty;
+    }
 
+    try
+    {
+        var messageItems = SafeJsonConvert.DeserializeObject<Flexi.Base.MessageItem[]>(_responseContent, Client.DeserializationSettings);
+        var ex = new Flexi.Base.WebServices.FlexiIntegrationException(messageItems);
+        if (_shouldTrace)
+        {
+            ServiceClientTracing.Error(_invocationId, ex);
+        }
+        _httpRequest.Dispose();
+        if (_httpResponse != null)
+        {
+            _httpResponse.Dispose();
+        }
+        throw ex;
+    }
+    catch (JsonException)
+    {
+        //Just ignore and do default error handling.
+    }
+}
+//Flexi integration error handling end.
+@EmptyLine
 if (@(Model.FailureStatusCodePredicate))
 {
     var ex = new @(Model.OperationExceptionTypeString)(string.Format("Operation returned an invalid status code '{0}'", _statusCode));
+    if (null == _responseContent)
+    {
 @if (Model.DefaultResponse.Body != null)
 {
     @:try
@@ -338,7 +377,7 @@ else
         @:_responseContent = string.Empty;
     @:}
 }
-
+    }
     ex.Request = new Microsoft.Rest.HttpRequestMessageWrapper(_httpRequest, _requestContent);
     ex.Response = new Microsoft.Rest.HttpResponseMessageWrapper(_httpResponse, _responseContent);
     @(Model.InitializeException)
