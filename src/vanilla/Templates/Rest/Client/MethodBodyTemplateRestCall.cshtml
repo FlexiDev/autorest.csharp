@@ -301,7 +301,8 @@ System.Net.HttpStatusCode _statusCode = _httpResponse.StatusCode;
 cancellationToken.ThrowIfCancellationRequested();
 string _responseContent = null;
 @EmptyLine
-//Flexi integration error handling begin.
+@if ((bool)Settings.CustomSettings["HandleInternalServerError"])
+{<text>//Flexi integration error handling begin.
 //Internal Server Error (500) may be caused by different reasons.
 //Flexi uses it to notify the client about internal exceptions.
 //If the response body corresponds to Flexi.Base.MessageItem[],
@@ -337,7 +338,7 @@ if ((int)_statusCode == System.Net.HttpStatusCode.InternalServerError)
     }
 }
 //Flexi integration error handling end.
-@EmptyLine
+@EmptyLine</text>}
 if (@(Model.FailureStatusCodePredicate))
 {
     var ex = new @(Model.OperationExceptionTypeString)(string.Format("Operation returned an invalid status code '{0}'", _statusCode));
